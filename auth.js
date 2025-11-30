@@ -399,4 +399,47 @@ async function login(e) {
 lBtn && lBtn.addEventListener("click", login);
 
 
-             
+
+
+
+// --- LOGOUT FUNCTIONALITY ---
+
+// Logout button ko sirf DOM content load hone ke baad target karein
+document.addEventListener('DOMContentLoaded', () => {
+    // NOTE: 'logout-btn' Admin aur User dono pages par hai.
+    let logoutBtn = document.getElementById("logout-btn");
+    
+    // Yahan Console.log laga diya hai, ab yeh console mein zaroor aana chahiye
+    console.log("Logout Button Element found:", logoutBtn); 
+
+    async function logout() {
+        try {
+            const { error } = await supaBase.auth.signOut();
+
+            if (!error) {
+                Swal.fire({
+                    title: "Successfully logged out!",
+                    icon: "success",
+                    confirmButtonText: "Go to Login page",
+                }).then(() => {
+                    // Default jahan jana hai
+                    location.href = "login.html"; 
+                });
+            } else {
+                console.error("Supabase SignOut Error:", error);
+                Swal.fire({
+                    title: "Logout Failed!",
+                    text: error.message,
+                    icon: "error",
+                });
+            }
+        } catch (err) {
+            console.log("Logout System Error:", err);
+        }
+    }
+
+    // Ab listener lagayen
+    if (logoutBtn) {
+        logoutBtn.addEventListener("click", logout);
+    }
+});

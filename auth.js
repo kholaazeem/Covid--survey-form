@@ -127,38 +127,13 @@ async function signUp(e) {
       
       })
       return;
-    }
+    
 
     
-    // --- STEP 2: Admin Table ('profiles') mein data bhejo ---
-    // (Ye Naya Code Hai Jo Zaroori Hai)
-    const { error: dbError } = await supaBase
-      .from('Profiles') // Table ka naam
-      .insert({
-        username: sUName.value,
-        email: sEmail.value,
-        phone: sPhn.value
-        // Password save nahi kar rahy (Safe practice)
-      });
-
-    if (dbError) {
-      console.log("Database Error:", dbError);
-      // Agar table mn error aye to bhi user ko batao, lkn account ban chuka hota ha usually
-      Swal.fire({
-        title: "Database Error!",
-        text: dbError.message,
-        icon: "error",
-         color: "#003b46",
-        confirmButtonColor: "#003b46",
-        confirmButtonText: "OK",
-        padding: "20px",
-        borderRadius: "15px",
-      });
-
     } else {
       Swal.fire({
         title: "Signup successfully!",
-        text: "Welcome to Ticket Manager",
+        text: "Welcome to covid survey",
         icon: "success",
         draggable: true,
         background: "#f9fbfc",

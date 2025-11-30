@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COVID-19 Health Survey</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom Styles for visual appeal */
+        body {
+            background-color: #f8f9fa;
+        }
+        .survey-card {
+            max-width: 850px;
+            margin: auto;
+        }
+        .question-item {
+            border-left: 5px solid #007bff; /* Blue accent bar */
+            padding-left: 15px;
+            background-color: #fff;
+        }
+        #timer-display {
+            font-size: 1.25rem;
+            color: #dc3545; /* Red color for urgency */
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <div class="card shadow-lg survey-card">
+        
+        <div class="card-header bg-primary text-white p-3 d-flex justify-content-between align-items-center">
+            <h3 class="mb-0">COVID-19 Health Survey</h3>
+            <div id="timer-display" class="fw-bold bg-light p-2 rounded text-danger">
+                Time Left: 10:00 
+            </div>
+        </div>
+        
+        <div class="card-body p-4">
+            <form id="question-answering-form">
+                
+                <div id="questions-container" class="mb-5">
+                    
+                    <div class="question-item mb-4 p-3 border rounded">
+                        <p class="fw-bold text-primary">1/4. Do you have the following symptoms? (Multiple Choice)</p>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="answer_1" id="q1_opt1" value="Difficulty Breathing">
+                            <label class="form-check-label" for="q1_opt1">Difficulty breathing</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="answer_1" id="q1_opt2" value="Fever">
+                            <label class="form-check-label" for="q1_opt2">Fever (>= 38 °C) or flu-like chills</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="answer_1" id="q1_opt3" value="None">
+                            <label class="form-check-label" for="q1_opt3">None of these symptoms</label>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <label for="comment_1" class="form-label small text-muted">Add your Comment (Optional):</label>
+                            <textarea id="comment_1" name="comment_1" class="form-control" rows="1"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="question-item mb-4 p-3 border rounded">
+                        <p class="fw-bold text-primary">2/4. Have you travelled outside the country in the last 14 days?</p>
+                        
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="answer_2" id="q2_yes" value="Yes" required>
+                            <label class="form-check-label" for="q2_yes">Yes</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="answer_2" id="q2_no" value="No" required>
+                            <label class="form-check-label" for="q2_no">No</label>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <label for="comment_2" class="form-label small text-muted">Add your Comment (Optional):</label>
+                            <textarea id="comment_2" name="comment_2" class="form-control" rows="1"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="question-item mb-4 p-3 border rounded">
+                        <p class="fw-bold text-primary">3/4. Please enter your employee ID:</p>
+                        
+                        <input type="text" class="form-control" name="answer_3" required placeholder="Employee ID">
+                        
+                        <div class="mt-3">
+                            <label for="comment_3" class="form-label small text-muted">Add your Comment (Optional):</label>
+                            <textarea id="comment_3" name="comment_3" class="form-control" rows="1"></textarea>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">Submit Survey</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

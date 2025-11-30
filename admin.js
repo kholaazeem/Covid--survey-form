@@ -1,147 +1,145 @@
-// admin.js (Complete, Final, Error-Free Code)
+import supaBase from "./config.js";
 
-// Supabase client ko import karen
-import supaBase from "./config.js"; 
+// --- 1. DOM ELEMENTS ---
+const questionForm = document.getElementById('question-form');
+const questionTypeSelect = document.getElementById('question-type');
+const optionsSection = document.getElementById('options-section');
+const optionsList = document.getElementById('options-list');
+const addOptionBtn = document.getElementById('add-opt-btn');
 
-// Variable to keep track of the number of options for unique names
-let optionCount = 1;
-
-// --- FUNCTION DEFINITIONS (These need to be in the global scope of the module) ---
-
-function toggleOptions(questionType) {
-    const optionsSection = document.getElementById('options-section');
-    const isDataCheckbox = document.querySelector('input[name="is_data"]');
-    
-    // Reset Data checkbox state
-    isDataCheckbox.checked = false;
-    isDataCheckbox.disabled = true;
-
-    if (questionType === 'Multiple') {
+// --- 2. QUESTION TYPE CHANGE ---
+questionTypeSelect.addEventListener('change', (e) => {
+    const type = e.target.value;
+    if (type === 'Data') {
+        optionsSection.style.display = 'none';
+    } else {
         optionsSection.style.display = 'block';
-    } else if (questionType === 'Data') {
-        optionsSection.style.display = 'none';
-        isDataCheckbox.checked = true;
-    } else {
-        optionsSection.style.display = 'none';
     }
-}
+});
 
-function addOption() {
-    optionCount++;
-    const optionsList = document.getElementById('options-list');
+// --- 3. ADD OPTION FUNCTION ---
+addOptionBtn.addEventListener('click', () => {
+    const newRow = document.createElement('div');
+    newRow.className = 'input-group mb-2 option-row';
     
-    const newOptionRow = document.createElement('div');
-    newOptionRow.classList.add('input-group', 'mb-2', 'option-row');
-    
-    newOptionRow.innerHTML = `
+    // CHANGE: Neche input se 'required' hata diya hai
+    newRow.innerHTML = `
         <div class="input-group-text">
-            <input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer" value="${optionCount}" aria-label="Radio button for correct answer">
+            <input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer">
         </div>
-        <input type="text" class="form-control" placeholder="EN Option ${optionCount}" name="en_option_${optionCount}" required>
-        <input type="text" class="form-control" placeholder="FR Option ${optionCount}" name="fr_option_${optionCount}"> 
-        <button type="button" class="btn btn-outline-danger remove-option-btn" onclick="removeOption(this)">X</button>
+        <input type="text" class="form-control" placeholder="New Option"> <button type="button" class="btn btn-outline-danger remove-option-btn">Delete</button>
     `;
-    
-    optionsList.appendChild(newOptionRow);
-}
+    optionsList.appendChild(newRow);
+});
 
-function removeOption(button) {
-    const optionsList = document.getElementById('options-list');
-    if (optionsList.childElementCount > 1) {
-        button.closest('.option-row').remove();
-    } else {
-        alert("You must have at least one option.");
+// ... (Beech ka code same rahega) ...
+
+// --- Form Reset Logic (Submit k end mein) ---
+// Yahan bhi 'required' hata den
+optionsList.innerHTML = `
+        <div class="input-group mb-2 option-row">
+        <div class="input-group-text">
+            <input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer">
+        </div>
+        <input type="text" class="form-control" placeholder="Option 1"> <button type="button" class="btn btn-outline-danger remove-option-btn">Delete</button>
+    </div>
+`;
+
+// --- 4. REMOVE OPTION ---
+optionsList.addEventListener('click', (e) => {
+    if (e.target.classList.contains('remove-option-btn')) {
+        const row = e.target.closest('.option-row');
+        if (optionsList.children.length > 1) {
+            row.remove();
+        } else {
+            alert("At least one option is required!");
+        }
     }
-}
+});
 
-// --- DOM CONTENT LOADED AND SUBMIT HANDLER (Data Insertion Logic) ---
+// --- 5. FORM SUBMISSION (ERROR FIXED HERE) ---
+questionForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
 
-document.addEventListener('DOMContentLoaded', () => {
-    const questionTypeSelect = document.getElementById('question-type');
+    // --- A. DATA COLLECTION ---
+    const questionText = document.getElementById('en-question').value;
+    const type = questionTypeSelect.value;
+    const isRequired = document.querySelector('input[name="is_required"]').checked;
     
-    // 1. FIX: Initial call to set the correct state on load
-    toggleOptions(questionTypeSelect.value);
-    
-    // 2. FIX: Naya change listener jo error theek karega (onchange ki jagah)
-    questionTypeSelect.addEventListener('change', function() {
-        toggleOptions(this.value);
-    });
-    
-    // SUBMIT HANDLER: Yahan data database mein save hota hai
-    document.getElementById('question-form').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        const form = event.target;
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData.entries());
-        
-        // 1. Validation check
-        if (data.type === 'Multiple' && !data.correct_answer) {
-            alert("Please select the correct answer for the Multiple choice question.");
+    // Fail Response Logic
+    const failResponseValue = document.querySelector('input[name="fail_response"]:checked').value;
+    const failResponseBool = (failResponseValue === "Yes");
+
+    let optionsArray = [];
+    let correctAnswerText = null;
+
+    // --- B. OPTIONS HANDLING ---
+    if (type !== 'Data') {
+        const optionRows = document.querySelectorAll('.option-row');
+
+        optionRows.forEach(row => {
+            // FIX: '.option-text' ki jagah hum 'input[type="text"]' use kar rahy hain
+            // Ta ke wo apki HTML wali input ko bhi pakar le
+            const textInput = row.querySelector('input[type="text"]'); 
+            const radioInput = row.querySelector('input[type="radio"]');
+
+            if (textInput && textInput.value.trim() !== "") {
+                const val = textInput.value.trim();
+                optionsArray.push(val); 
+                
+                if (radioInput.checked) {
+                    correctAnswerText = val;
+                }
+            }
+        });
+
+        // Validation
+        if (optionsArray.length === 0) {
+            alert("Please add at least one option!");
             return;
         }
-
-        // 2. Options ko JSON format mein tayyar karna
-        let optionsArray = [];
-        if (data.type === 'Multiple') {
-            let currentOptionId = 1;
-            while (data[`en_option_${currentOptionId}`]) {
-                optionsArray.push({
-                    id: currentOptionId.toString(),
-                    en: data[`en_option_${currentOptionId}`],
-                    fr: data[`fr_option_${currentOptionId}`] || "" 
-                });
-                currentOptionId++;
-            }
+        if (!correctAnswerText) {
+            alert("Please select the Correct Answer (Radio button)!");
+            return;
         }
+    }
 
-        // 3. Data ko Supabase mein insert karna
-        const { data: insertedData, error } = await supaBase
-            .from('Questions') 
-            .insert([
-                {
-                    // Yeh columns ke naam hain jo aapki Supabase table mein hain:
-                    question_en: data.en_question, 
-                    // question_fr: data.fr_question || null, // Agar table mein ye column ho toh use karein
-                    type: data.type,
-                    options_json: optionsArray.length > 0 ? optionsArray : null,
-                    correct_answer_value: data.correct_answer || null,
-                    fail_response_is_yes: data.fail_response === 'Yes', 
-                    is_required: data.is_required ? true : false,
-                }
-            ]);
+    // --- C. SEND TO SUPABASE ---
+    try {
+        const { data, error } = await supaBase
+            .from('Questions') // Make sure Table Name sahi ho (Capital Q)
+            .insert({
+                ques_en: questionText,
+                type: type,
+                options_json: optionsArray,
+                correct_answer_value: correctAnswerText,
+                fail_response_is_yes: failResponseBool,
+                is_required: isRequired
+            });
 
-        // 4. Result check karna
-        if (error) {
-            console.error('Supabase Error:', error);
-            alert('❌ Sawaal save karne mein error aagaya. Console check karein.');
-        } else {
-            console.log("Question saved successfully:", insertedData);
-            alert("✅ Sawaal kamyabi se save ho gaya!");
-            form.reset(); 
-            // Reset hone ke baad form ko theek state mein laane ke liye:
-            toggleOptions(questionTypeSelect.value); 
-        }
-    });
+        if (error) throw error;
 
-    // Logic for "+ Add Question" button
-    document.getElementById('add-question-btn').addEventListener('click', function() {
-        // Logic to clear the form and prepare for a new question
-        document.getElementById('question-form').reset();
-        toggleOptions('Single'); // Reset to default type
+        // --- D. SUCCESS ---
+        alert("Question Saved Successfully!");
+        questionForm.reset();
         
-        // Reset option count and clear dynamic options, keeping one default row
-        const optionsList = document.getElementById('options-list');
+        // Reset Options UI
         optionsList.innerHTML = `
-            <div class="input-group mb-2 option-row">
+             <div class="input-group mb-2 option-row">
                 <div class="input-group-text">
-                    <input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer" value="1" aria-label="Radio button for correct answer">
+                    <input class="form-check-input mt-0 correct-answer-radio" type="radio" name="correct_answer">
                 </div>
-                <input type="text" class="form-control" placeholder="EN Option 1" name="en_option_1" required>
-                <input type="text" class="form-control" placeholder="FR Option 1" name="fr_option_1"> 
-                <button type="button" class="btn btn-outline-danger remove-option-btn" onclick="removeOption(this)">X</button>
+                <input type="text" class="form-control" placeholder="Option 1" required>
+                <button type="button" class="btn btn-outline-danger remove-option-btn">Delete</button>
             </div>
         `;
-        optionCount = 1;
-    });
+        
+        if (type === 'Data') {
+            optionsSection.style.display = 'block'; 
+        }
+
+    } catch (err) {
+        console.error("Supabase Error:", err);
+        alert("Error saving: " + err.message);
+    }
 });

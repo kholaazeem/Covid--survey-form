@@ -173,7 +173,7 @@ async function signUp(e) {
 
       })
         .then(() => {
-          location.href = "/crud/ecom-home.html"
+          location.href = "user.html"
         })
 
 
@@ -318,7 +318,7 @@ async function login(e) {
                 popup: "glass-alert"
             }
         }).then(() => {
-            location.href = "index.html";
+            location.href = "admin.html";
         });
 
 
